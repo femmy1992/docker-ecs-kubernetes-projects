@@ -1,0 +1,323 @@
+# Docker installation
+- sudo yum update -y = to update instance
+- Sudo yum install docker -y  = to install docker 
+- Sudo systemctl start docker = start docker
+- sudo systemctl enable docker = to start docker and keep it running all the time, so you don’t have to manually start docker when system is rebooted. 
+
+# Docker commands 
+- Systemctl status docker = to check if docker is active/running 
+- systemctl restart docker = to restart docker
+- Docker --version = to check version
+- Docker ps = shows all running container
+- Docker ps -a = shows all containers
+- docker -d = Start the docker daemon
+- docker --help = Get help with Docker. Can also use –help on all subcommands
+- docker info = Display system-wide information
+- docker info = gives all the information about docker 
+
+
+# Docker Images 
+- docker build . -t <image_name> = Build an Image from a Dockerfile
+- docker build -t <image_name> . –no-cache = Build an Image from a Dockerfile without the cache
+- docker build . -t image_name:tags(e.g. Version1) = cretae image with name and tag. -t means tags. if you dont add tags it will give latest. 
+- docker tag image_id image_name:tag(e.g. version2) = to tag or rename  existing image 
+- docker build . = to build a base image container then create image. . means pwd. 
+- docker images = List local images
+- docker rmi <image_name> = Delete an Image
+- docker rmi $(docker image ls -aq) = to delete all images 
+- docker rmi -f image_name = to force delete
+- docker image prune = Remove all unused images
+- docker image pull nginx = to pull image 
+- docker inspect image_name = to get information about the image
+- docker inspect image_name --format='{{.exact_info}}' = to search for a particular item of information
+- docker history my_image = to show the history of the image 
+- docker save my_image > my_image.tar = to create a zip file from image
+- docker load < my_image.tar in the second instance = to load image from a zip file
+- docker image load --input <my_image.tar> = to load image from a zip file
+- docker build –squash -t <imagename> = to compress an image 
+
+
+
+# Docker Containers 
+- docker run --name <container_name> <image_name> = Create and run a container from an image, with a custom name 
+- docker run -dt nginx = create and run a container in a detached mode. nginx is the docker official image. 
+- docker run -p <host_port>:<container_port> <image_name> = Run a container with and publish a container’s port(s) to the host.
+- docker run -dt -p 80:80 nginx = to create a connection between the instance and the app through port biding. -p is called mapping 
+- docker run -d <image_name> = Run a container in the background
+- docker start|stop <container_name> (or <container-id>) = Start or stop an existing container
+- docker rm -f <container_name> = Remove a running container
+- docker rm <container_name>
+- docker container stop $(docker container ls -aq) = stop all containers 
+- docker container rm $(docker container ls -aq) = remove all containers)
+- docker exec -it <container_name> sh = Open a shell inside a running container
+- docker logs -f <container_name> = Fetch and follow the logs of a container
+- docker inspect <container_name> (or <container_id>) = To inspect a running container
+- docker ps = To list currently running containers
+- docker ps --all = List all docker containers (running and stopped)
+- docker container stats = View resource usage stats
+- docker kill <conatiner_id> = to stop containers 
+- docker run -dt -p 80:80 image_ID or Image_name = to create a container from a local image and map the port at the same time. 
+- docker run -d --name=container_name -p port_mapping image_name = to create an name the container
+- docker rename container_name container_new_name = to rename an existing container
+- docker run -d --name=container_name -p port_mapping -p port_mapping image_name = to create with status for the second port mapping (jenkins only) 
+- docker exec -it container_id bash/sh = this will enable get into the container. you can use bash or sh, it represent the terminal. -it means interactive mode.
+- docker inspect container_id = information of the container
+- docker inspect 
+- docker commit <container_id > = to create an image out of a container or to take backup
+- docker run -dt --rm image_id = will auto remove container when it is stopped. allows you to preserve ebs volume.
+- docker export container_id > file_name.tar = to compress a container in other to move it or export it. you can export it to s3 bucket
+- docker container commit container_id myimage = to commit changes made to the container to the image
+- docker container commit container_id my_image = this will commit a change in the container to the Image
+- cat /etc/*release = to see the release info about OS
+
+
+
+# Docker file syntax
+- FROM = it must start with a FROM instruction. the FROM instruction specifies the base image from whcich you are building.  
+
+- RUN = it is the central executing directory for a docker file. it takes any command as arguement and run it from the image. it is used to install any software/tools that can be package with image. so when you create a container from the image, it will include all the tools or software. it is executed when creating the image
+
+- CMD = It describes the default container parameters or commands. The user can easily override the default command when you use this. similar to ENTRYPOINT
+
+- LABEL = to tag the image, add metadata in the form of key -value pairs 
+
+- EXPOSE = it informs docker that the container listens on the specified network port at runtime. it does not publish the port.
+
+- ENV = it set the environment variable <key> to the value <value>. you can use -e, --env, and --env-file flags to set simple environment variables in the container your are running or overwrite variables that are defined in the dockerfile of the image you are running. e.g. docker RUN --env VAR1=value1 --env VAR2=value2 ubuntu env | grep VAR
+
+- ADD = copy file froma specific location into a docker image. instead of local, you can use URL and can also extract a tar file from source directly into destination. using ADD to fetch remote URL is discouraged, use CURL or Wiget instead
+
+- COPY = copy file from specific location into a docker image. it only let you copy in a local file or directory from your host.
+
+- ENTRYPOINT = to set the image's main command. it doesnnt allows you to overide the command. you can only overide it when you use the --entrypoint flag. it is only triggered when you are trying to create a container from the image. similar to CMD
+
+- VOLUME = creates a mount point for a volume in Docker in a docker container
+
+- USER = sets the user account to use when running commands in the Docker image.
+
+- HEALTHCHECK = allows us to tell the platform on how to test that our application is healthy. we can specify certain options before the CMD operation, this include 
+HEALTHCHECK --interval=5s CMD ping -c IP address
+
+- WORKDIR = it set the working directory for any RUN, CMD, ENTRYPOINT, COPY, and AAD instructions that follow it in the docker file. it can be used multiple times in a dockerfile. any command aft the WORKDIR will be ran in the path specified in WORKDIR- 
+
+- MAINTAINER = sets the name and email address of the image maintainer.
+
+- ONBUILD = specifies instructions to run when the Docker image is used as the base   image for another Dockerfile.
+
+- Many more
+
+- example: FROM debian:bullseye-slim = 'FROM' is a command, 'debian:bullseye-slim' is an arguement and both together is an instruction. multiple instruction is called a set of instructions.
+
+# example of a dockerfile 
+FROM ubuntu
+RUN apt-get install service 
+or 
+RUN tar -xzvf web-$NGINX.tar.xz 
+or 
+RUN curl -SL http://example.com/web-$NGINX.tar.xz
+EXPOSE 8081
+CMD ["service"]
+ENV NGINX_VERSION 1.2 (Nginx_version is Key and 1.2 is the value)
+ENTRYPOINT ["top", "-b"]
+CMD ["-c"]
+WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN pwd 
+output = a/b/c
+
+# docker flow
+- create a codefiles (e.g with python, java, etc) --> done by application developer
+- start an EC2 instance 
+- create a dockerfile -
+- build a base/intermediate  image container (coming from 'FROM instruction') it will be killed after the image  is created 
+- build dcoker image --->  (packaged with code files and dependencies)
+- push docker image to dockerhub/AWS ECR 
+- pull docker image into EC2, ECS or EKS 
+- create docker containers
+- compress container into a zip file and store s3 bucket --> in other to export to another EC2, ECS or EKS (optional)
+- copy zip file from s3 --> in other to import it into an image and create containers from it (optional)
+
+
+# simple Dockerfile - example 1
+vi Dockerfile
+FROM ubuntu
+RUN apt-get update -y
+RUN apt-get install nginx -y
+COPY index.html /var/www/html
+CMD nginx -g 'daemon off;'  --> command to start nginx
+# example 2
+FROM busybox
+COPY copy.txt /tmp
+CMD ["sh"]
+# example 3
+FROM busybox
+COPY file2.txt /tmp
+ADD file3.txt /tmp
+ADD file.tar.gz /tmp    = if the zip file has file1.txt, it will copy and paste it to the location
+CMD ["sh"]
+# example 4
+FROM busybox
+RUN mkdir /root/folder_name
+WORKDIR /root/folder_name   = any command after it will be ran in /root/folder_name except for "sh" bcos we added /bin/ in front of it
+RUN touch file.txt
+CMD ["/bin/sh"]
+# example 5
+FROM busybox
+ENV VERSION 1.5   = it could be any key and value
+RUN touch test-$VERSION.txt  = it will be replaced by the value of the key in the conatainer i.e. test-1.5.txt
+CMD ["/bin/sh"]
+
+
+
+# create a web page with container example 
+https://www.w3schools.com/html/html_examples.asp
+
+filename = index.html
+<html>
+<body>
+<h1>My First Docker Project</h1>
+<p>Beautiful Family - Femi, Yomi, Nifemi, Feranmi.</p>
+</body>
+</html>
+
+# general info 
+1. attach mode will create log in the contain, so whenever the website is refreshed the logs keep changing. and you need to ctl c to be able to exit the container. this will kill the container. the only way to login into the container is to create another session. it is use for testing not for production because it will display the logs.
+2. run top in an instance it will show you all the PID running in that instance
+3. if you restart a container only the primary PID will restart, every other exec command like bash or ping will not be restarted.
+4. PID1 Processing ID = it helps to run the base application. if PID get killed, container dies. PID can be killed by overide or passing another command after it. see default commands
+
+# Importance of IT flag (it means interactive mode)/ logging driver. 
+STDIN = standard input
+STDOUT = standard output 
+STDERR = standard error
+- two important flags with respect to containers 
+1. --interactive flag = keeps STDIN open even if not attached.
+2. --tty flag = allocates a pseudo-TTY.
+
+# Defualt commands 
+- docker run -dt -p 80:80 nginx sleep 10 = sleep 10 seconds will overide the PID 1 and kill the container after 10 seconds
+
+# Restart Policies 
+- Docker host = Nginx or Apache
+- use --restart flag with docker run command .
+- no = do not auto restart container. (the defualt). container dies if docker is restarted, if the container is killed or stopped.
+- on-failure = restart the continer if it exits due to an error, which manifests as a non-zero exit code
+- unless-stopped = restart the container unless it is explicitly stopped or docker itself is stopped or restarted.
+- always = always restart the container even if stop container or kill container. once you restart docker it will come up again
+- e.g. docker run -dt  --restart always image_name = to always restart container
+- the most common policy in work environment = on-failure or unless-stopped.
+
+# Disk usage metrics 
+- docker system df = display information regarding the amount of disk space used by the docker daemon
+
+# Docker Image Layer
+- docker history image_name = to check the layers in an image. the layer is all the instruction in a dockerfile used to build an image. the more layers means less performance because it will take more time to build, but less layer is more performance.
+
+# Export/Import of Container (copy container from EC2 A to EC2 B)
+- docker export container_id > file_name.tar = this will create a zip file in EC2 A, which can be copied to s3 bucket
+- aws s3 cp file_name.tar s3://bucket_name = to copy it into a bucket from EC2 A
+- aws s3 cp s3://bucket_name/file_name.tar . = to copy from s3 bucket to the PWD of EC2 B. 
+- install docker in EC2 B
+- cat file_name.tar | docker import - image_name:tag = to import an image out of the container in EC2 B
+- docker run --name=container_name -dt -p port_mapping image_name = to create a container out of the imprted image in EC2 B  (getting error - will fix it later probably by pushing the image to my dockerhub repo before pulling it )
+# another method without s3 bucket (still with issue running the container)
+- docker export container_id > file_name.tar
+- scp file_name.tar ec2-user@ip address = to upload to your remote server
+- ssh into ec2-user@ip address
+- cat file_name.tar | docker import - image_name:tag 
+- docker run image_id:tag (still didnt work)
+
+
+# transfer image with SCP
+- docker save my_image > my_image.tar = to save image into a zip file 
+- scp my_image.tar user-ec2@ip address  = to upload image on your remote machine
+- ssh into ec2-user@ip address
+- docker load < my_image.tar
+- docker run my_image
+# or 
+- docker save my_image > my_image.tar
+- copy to s3 bucker 
+- docker load < my_image.tar in the second instance
+- docker run container
+
+
+# DockerHub
+- it could be private or Public
+- docker login = to login to docker from your instance or cli
+- docker pull username/myimage_name:mytag = to pull your image from docker hub.. by defualt it will pull any tag named 'latest' if tag is not specified
+- docker push username/myimage_name:mytag = to push your image to dockerhub make sure you have a repo in dockerhub with the path above
+- docker search <image_name> = Search Hub for an image
+
+# Elastic Container Registry ECR
+- EC2 = attach ECR IAM role 
+- create ECR private repositoy
+- go to push command in your repo to retrieve authentication
+- tag image to reflect repository name
+- push to ECR with the new tag
+
+
+# Docker Network
+- enX0 = this is the base network/gateway inteface  for the instance. it allows the instance to communicate with the outside world/ internet
+- docker0 = this is the base network/gateway inteface  for the docker installed within the instance. it allows container to communicates with enX0 
+- eth0 = this is the base network/gateway inteface  for container and it communicates with docker0.
+- docker network ls = to see the docker network and it drivers.
+- docker network inspect driver_name = to see the network connection of each drivers
+- apt-get update && apt-get install net-tools = to update the container and install network drivers/tool in the continer.
+- ifconfig = to see network configuration
+- apt-get install iputils-ping = to install ping driver in the container
+- brctl show = to show the details of the bridge network
+- yum install bridge-utils = to install our own bridge on the instance and define our own bridge network
+- docker network create --driver bridge my_bridgename = to create our own bridge network
+- docker run -dt -p 80:80 --network my_bridgename my_image = to create a container with my network
+- docker network ls
+- docker network create <network_name> = to create a custom bridge network
+- docker run -dt --network host my_image = to run on host network 
+- types of drivers:
+1. Bridge = this is the default network for the container
+2. Host
+3. Overlay
+4. Macvlan
+5. Null 
+
+# Docker Storage 
+- docker volume ls = to check the storage
+- docker volume create my_volume = to create a new volume 
+- docker volume ls = see list of all volumes 
+- docker volume inspect my_volume = to see information about the volume
+- mountpoint for volume = /var/lib/docker/volumes/my_volume/_data"  = what data created in the content of the container will be stored in this path in EC2 instance
+- docker run -dt -v my_volume:/path(etc) my_image = to create a container and mount the volume on it.
+- docker run -d -p 80:80 -v <volume_name>:/path (inside container) <image> = to create a container with an image mounted
+
+# Docker Compose
+-Docker Compose is a tool that allows you to define and run multi-container Docker applications.
+It allows you to define the services that make up your application, how they are connected, and how they should be run. Docker Compose uses YAML files (docker-compose.yaml) to define the services, networks, and volumes that make up your application.
+- docker-compose up = builds, re(creates), start and attaches to container for service 
+- docker-compose down = stop containers and remove containers, network, volume, image created with up
+- docker-compose -f file_name.yml up -d = to use a different file name 
+- docker-compose top = displays the running processes
+- docker-compose start = start existing container for a service 
+- docker-compose stop = stop running container without removing them 
+- docker-compose pause = pause running container 
+- dcoker-compose build = build service and tag them as <my_project>
+- docker-compose logs = displays log output from service 
+- docker-compose scale = scale the number of containers to run for a service. Depreciated, use --scale flag of the up command instead
+- docker-compose images = list images used by created containers
+- docker-compose kill = forces running containers to stop sending a sigkill signal
+- docker-compose rm = rempoves stopped service containers
+
+
+# General command 
+- sudo  netstat -tulpn = to check assigned/allocated ports in Linux
+- top = to see all the info about the ec2 instance
+- tar -czvf file.tar.gz file.txt = to compress file.txt; file.tar.gz is an extension of a tar file just like .jpeg or .sh
+- tar -czvf file.tar.gz *.txt = to compress multiple files, file.tar.gz is the archive name
+- tar -czf file.tar.gz *.txt = will achieve same as above
+- tar -ztvf file.tar.gz = to list all compressed file 
+- tar -ztvf file.tar.gz *.txt = to unzip or decompressed into a txt files
+- tar -xf file.tar.gz = to extract the files in a compressed file
+- run env = to see all the env variables in your instance or even your local
+- make sure your image name is the same as your repo name i.e. username/repo_name = image_name
+- ifconfig = to check the network connection 
+- docker run -dit --name httpd-ab -v /var/www/html:/usr/local/apache2/htdocs/ httpd = to download the httpd-ab image and run the container
+- run - ab -r -c 500 -n 5000000 <alb dns> --> to generate more traffic to your container after you exec -it into the container

@@ -1,0 +1,107 @@
+# ECS fundamentals 
+- user data for cicd piepline will include installation of:
+1. jenkins
+2. git
+3. # maven
+4. # java
+5. Ansible
+6. node exporter i.e. prometheus
+7. node exporter dependencies 
+8. terraform
+- virtualization or containerization = both are important. vm allows servers to utilize the hypervisor on top a host OS | containerization is parkaging our app i.e. app + dependencies + java
+- containers are light, fast and isolated. it utilizes the host OS. which makes it fast.
+- management of containers --> N/W; load balancing; storage; deployment
+- limitation of containerization --> difficult to monitor multiple containers deployed to multiple environment
+- benefits --> 
+1. helps managed the control plane 
+2. autoscaling and load balancing '
+3. serverless options 
+- ECS cluster --> it suport two types 
+1. EC2 instance based --> easy to set up, flexibile, OS level access, difficult to maintain, cheaper.
+2. Fargate based --> no OS level access, less maintainance, expensive
+- if i have a job task and i want to collect data everyday at 10am from my database, and publish it into redshift for analysis. how? 
+1. python to trigger a lambda function/cron job with eventbridge to trigger the lambda function
+2. i can use contab in ec2 with python to perform the task
+3. i can use fargate
+- blockers to the scenario
+1. because the data is dynamic, the process will take more than 15mins, so we cant use lambda function
+2.  since i dont want to manage the server and i dont need OS level access, ec2 is not suitable 
+3. fargate is the best option bcos it the code needs 5mins or 500mins fargate will terminate after the mins. and no need to maintain the server.
+- Core concept of ECS --> 
+1. cluster --> outer scope
+2. service --> maintained the load balancer, autoscaling and expose task to outside world.
+3. task definition --> containers + NW + IAM role + Ram + cpu + storage
+4. container definition. --> image url, image size, etc
+- for on prem server to connect to ecs, install ecs agent, aws cli and configure the credentials
+- soft and hard limit --> soft is min and hard is max. if container exceed hard limit it will ne killed
+- port numbers from 49152 - 65535 are reserved for dynamic port mapping
+- use back of envelop strategy to determine the task memory and cpu 
+
+# ECS project
+- create ec2-ecs role or | use CFN to create iam role, network and ecs 
+- create new task definition -- host port = 0 for multiple containers 
+- run task 
+- create a new revision to create a task definition from old task 
+- create service 
+- create cluster for fargate | use CFN to create fargate cluster 
+- create a task definition
+- run task 
+- create cfn with ecs and elb 
+- run - ab -r -c 500 -n 5000000 <alb dns> --> to generate more traffic to your container after you exec -it into the container
+- go to cloudwatch alarm and click on add to dashboard and create new dashboard for both scaleout and scalein alarm 
+
+# ECS and CICD
+- cloud native deops tool is 
+1. easy to maintain
+1. Scalability
+3. security withina single ecosystem
+- open source 
+1. easyb to install 
+2. greater community 
+3. plugins of all tools is available and more capabilities 
+- aws mostly used devops tool 
+1. code build  - cicd tools --> jenkins 
+2. code commit - SCM and repository are private --> gitlab
+3. code deploy -- for deployment --> Ansible 
+4. code pipeline - pipeline for sequence of action --> jenkins pipeline
+- CICD pipeline steps 
+1. git checkout
+2. build 
+3. test  --> backup artifacts
+4. deployment 
+5. monitor 
+- cicd for aws native
+1. codecommit --- (cloudwatch)--> codepipeline ---> codebuild --- > (ECR) with IAM role for pull and push --> codedeploy --(ECS) -- (Fargate/lambda or EC2) --> blue/green or rollout deployment.
+- major phases in buildspec file 
+1. install
+2. pre-build
+3. build
+4. post-build 
+- codebuid vs Jenkins --> 
+1. codebuid is serverless, you only pay for the build and it is highly scalable, you dont maintain infrastructure. 
+2. Jenkins is server based, so you pay for server 24/7 and it is difficult to scale. it cannot accomodate 100+ builds at parallel and anything less than 10 builds means it is under utilized.
+
+# CICD project
+- go to IAM under security credentials, generate https git credentials for codecommit 
+- create a repo in codecommit, clone the repo with the IAM key above and push code to the repo 
+- create ECR repo 
+- create policy for:
+1. s3 -> getbucktAcl; getbucketlocation; getobject; getobjectlocation; putobject
+2. ECR -> all resources
+3. codecommit -> gitpull
+4. cloudwatch -> createloggroup; createlogstream; putlogevents
+- create IAM role for codebuild and add the policy above 
+- create buid project from codebuild - with environment variables : Name = REPOSITORY_URI & value = ecr repo url, add buildspec name
+- start build -> to build the image
+- create cfn stack for 
+1. IAM role -> ecs, autoscaling, & task 
+2. VPC -> vpc, alb, sg, ecs 
+3. fargate service - with base image 
+- create codepipeline with
+1. source code -> codecommit 
+2. build -> codebuild 
+3. deploy provider -> ECS 
+- add stage between build and deploy with manual approval and save
+- edit your source code in your local html and push to codecommit 
+- it will trigger the pipeline automatically - complete the manual approval. 
+

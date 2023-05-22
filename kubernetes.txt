@@ -1,0 +1,250 @@
+################## Kubernetes Architecture ########################################
+- Control Plane/Master Node: 
+1. Api Server 
+2. Controller Manager
+3. Scheduler 
+4. ETCD = called the cluster brain
+- Worker/Slave Nodes: = it is a physical/virtual server
+1. Pods = abstraction of containers i.e. runs containers and exists in node
+2. Docker
+3. Kubelet
+4. Kubernetes proxy
+- Services SVC: = created instead of IP - communication, handle requests
+1. Internal service = ClausterIP 
+2. External service = NodePort and Load balancer(multiple containers).
+- Ingress Controller = defines the routing policy/rules for all the app in the kubernetes cluster
+- Config maps and secrets = external configuration
+- Replica
+- Traffic is routed --> Service (dependoing on the type ) --> routed to containers
+- Stateless Applications = use deployment. dont keep record of Stateless. example website app. no need for volume 
+- Stateful Applications = use Satetfulset. e.g. database, application that store data
+- Node js (java script) aka RTA (real time App) = it is a programming language used to develop User interface UI/frontend.
+- traffic --> http --> Node js <---> database
+
+################## Scaling database Applications with statfulset (STS) ###########################
+- deploy a replica (myaql0) i.e. Node1 it will create a PV (persistent volume) i.e. data/vol/pv-0 ----> 
+- mysql1 1.e. Node2 will create PV i.e. data/vol/pv-1 ----> kubernetes auto replicate pv-0 in pv-1 and so on it is called PV claim in your code block---> 
+- in a statefulset, the first database is called master and resides in the slave node.
+- if all the pods dies, all data will still survive.
+
+# Deployment = pulling image from ECR/Docker hub and creating a container in cluster. for every deployment file there should be a service file which determines the communication
+- Deployment will not auto replicate the pv in other nodes.
+
+################## kubernetes configuration file = has 3 parts ############################
+- YAML configuration files = Deployment or STS
+1. metadata = it is used as a description
+2. Specification = the specs of the deployment like replicas, selector, etc.
+3. Status = it is a file auto generated and added by kubernetes. it ensures that the desired pods = actual pods at all times.
+- etcd holds the current status of any k8s components
+
+
+####################### General Infor #########################
+- EKS used to manage the control plane/master 
+- PV store information when container dies 
+- PVC claim information from the previous Node 
+- 3 ways to communicate with the cluster = UI, API and CLI 
+
+######################## Comamds  ###############################
+- kubectl = enables interaction with cluster. it is a CLI mode of communication e.g. create pods, create services, destroy pods, etc.
+- kubectl scale --replicas=3 deployment xyz -n my_namespace = to increase the number of pods
+
+
+
+
+##################################### Kubernetes - Youtube course: #####################################
+# what is Kubernetes  
+- infrastructure --> kubernetes cluster 
+- cluder --> master/conrol plane; virtual netwrok; & worker/salve nodes 
+1. master --> API server; Controller manager; Scheduler; & etcd
+- API server --> entrypoint to k8s cluster: UI, API or CLI 
+- c-m --> keeps track of what is happening in the cluster 
+- sched --> ensures pods placement 
+- etcd --> store current state of the cluster, backing restore
+2. virtual network --> creates one unified machine withing the cluster 
+3. Worker --> pods; service; kubelet; kubernetes proxy; & docker
+- pods --> abstraction over container. 1 app/pod except main app with helper app. 
+- service --> permanent IP & load balancer | external and internal
+- kubelet --> convey info to and fro master node
+- kubernetes proxy --> manages pods secrets, volumes, healthcheck, creation of pods
+- docker --> runs pods 
+
+############# kubernetes configuration components ####################
+- configuration file --> yaml or json
+- configmap --> external configuration of your app or database
+- secrets --> secret data | in base64 encoded
+- ingress --> use to route traffic to the cluster
+- volume --> stored remotely or locally in the cluster | mount on the pod 
+- Deployments --> blueprint for stateless app pods | specifies the replicas and autoscaling attributes for app pods | abstraction of app pods 
+- statefulset --> replicate stateful app or database | autoscaling them | make sure database reads and write are synchronized to avoid data inconsistency.
+
+##################### Kubernetes Architecture ######################
+- Nodes --> this is the server | each nodes has multiple app pods running on it. e.g app and db | does the actual work 
+- Worker Node Processes --> 3 processes needs to run on every node
+1. container runtime --> docker 
+2. kubelet --> interacts with both the container and the node | it is responsible for running a pod with a container inside and assign resources to the pod
+3. Kube proxy --> manages pods healthcheck, volumes, secrets, etc.
+- Master Node processes --> 4 processes run on every master node
+1. API server --> cluster gateway and entrypoint for client | gatekeeper for authentication | UI, API or CLI | it validate and forward client's request to other processes
+2. Sceduler --> decides how to place pods | it just decides which node a new pod be scheduled
+3. controller manager --> detects cluster state changes and try to recover it as soon as possible | makes request to scheduler to restart the pods
+4. etcd --> cluster brain | cluster changes get stored in the key value store | app data is not stored here like database data.
+
+####################### example of cluster set ######################
+- 2 master Nodes ---> with less resources like CPU, RAM & Storage
+- 3 worker Nodes --> with more resources 
+- add new master/worker node --> new bare server; install all processes & add it to the cluster 
+
+####################### Benefits of K8s ######################
+- flow: client request --> ingress --> app seervice  or db service --> distributed to app or db
+- high availability --> if any replica dies, controller manager schedules new replicas and recovers the previous load balanced and app state
+- Scalability --> every components of the flow is replicated; load balanced; no bottleneck that slows down responses | 
+- disaster recovery --> etcd backups via snapshot and store them in remote storage | app data and database storage are stored remotelly outside of the cluster
+
+####################### advantages of K8s: ######################
+- replication is much easier
+- self-healing of k8s nature
+-smart scheduling feature 
+
+####################### Kubernetes in practice  ######################
+- minikube --> it is a one node cluster where the master processes and worker processes run on one node | docker container runtime is pre-installed.
+- it creates virtual box on your laptop and nodes run in the virtual box | use for testing 
+- Kubectl --> it is way to interact with your cluster. it is a CLI tool and most powerful. 
+# installing minikube and kubectl 
+- install hyperkit with app store  -- installed xcode app 
+- brew install minikube. kubectl will be installed because it is a dependency
+
+####################### Basic kubectl commands (CRUD - create update and delete) ######################
+- kubectl create deployment <name> 
+- kubectl edit deployment <name>
+- kubectl delete deployment <name> 
+- kubectl get nodes|pods|svc|replicaset|deployment|secret|namespace  = to get status of diff k8s components
+- kubectl logs <pod name> = log to console 
+- kubectl exec -it <pod name> -- bin/bash = get interactive terminal | helpful for debugging 
+- kubectl create deployment mongo-depl --image=mongo | --image=nginx 
+- kubectl apply -f <filename> = for all file secret|configmap|database|app| in this order.
+- kubectl describe service <service name> = to get infor about service 
+- kubectl get pod -o wide = for more info about pod
+- kubectl get deployment <deployment name> -o yaml > filename.yaml = to get the status file and save it in a file | helpful for debugging
+- echo -n 'username' | base64 = to generate a secret username from cli 
+- echo -n 'password' | base64 = to generate secret password used for my secret file 
+- kubectl get all | grep <appname> = to see all conponents.
+- kubectl create namespace <my-namespave> = to create a namespace
+- kubectl api-resources --namespaced=false/true  = to see resources not bound/bound to namespace.
+- kubectl get <resource> -n <namespace_name> = to see resources 
+- kubectl get all = to see all reources and components 
+- kubectl apply -f <filename> --namespace=<my-namspace>
+- kubens <my_namespace> = to switch active name space from default to any namespace. 
+- kubectl get ingress --watch = to see the ip address of the ingress rule 
+- kubectl describe ingress <my-ingress> = to see the details of the ingress
+- helm install <chart-name> = to reuse helm chart. 
+- helm search <keyword> = to search for chart
+- helm upgrade <chart-name>
+- helm rollback <chart-name> 
+- export KUBECONFIG=kubeconfig-file.yaml = to set as environmental variables
+- kubectl get ns = to list all namespaces 
+- kubectl api-resources = to get information about all resources 
+
+-Layers of abstraction  deployment manages --> replicaset --> pod --> container. 
+- all we do is deployment, everything below deployment is managed by k8s.
+
+####################### YAML configuration file in kubernetes ######################
+- 3 parts --> metadata (it has label); specification (it has selectors) and status (auto generated by k8s)
+- connecting components (label, selector & ports) --> matadata part contains label and specification part contains selectors 
+- pods get the label through template blueprint 
+- this label is matched by the selector i.e. matchlabel = the label in the deployment metadata is matched to the label in the template metadata 
+- connecting service to deployments --> deployment label under matadata is defiend on the service under selector 
+- port is also configured --> service has a port and also a targetport which will be the port of the container in deployment
+
+####################### Kubernetes  Namespace ######################
+- organizes resources in namespace 
+- it is a virtual cluster inside of k8s cluster 
+- there 4 namespaces by default 
+1. kube - node-lease --> info about the haertbeats of nodes 
+2. kube-public --> publicly accessible data | configmap
+3. kube-system --> not meant for your use | resources are system processed, master and kubectl processes
+4. default --> resources created are located here 
+-  kubernetes-dashboard --> only with minikube installation
+- you can create namespace with command or with the configmap file 
+- uses --> 
+1. to grouped resources in namespaces e.g database; monitoring; elastic stack; nginx ingress resource
+2. to avoid conflict of many teams on same application
+3. resource sharing for 2 environments or blue/green deployment
+4. access and resource limit on  namespaces 
+- characteristics --> 
+1. you cant access most of the resources from another namespace e.g. configmap and secret 
+2. you can access service in another NS 
+3. some resources can't be namespaced bcos you can't isolate them e.g. Volume and Node.
+- best practice --> 
+1. create in the configmap file under metadata so it can be documented and more convinient for automation
+- run brew install kubectx, it will also install Kubens which is used to change active namespace. 
+
+####################### Kubernetes Ingress ######################
+- it helps mask your ip address and port 
+- request form internet reaches ingress --> service --> pod.
+- ingress controller --> should be installed in a pod. it evaluates all the rules and managed redirections within the cluster
+- flow: 
+1. client request --> 
+2. Load balancer --> 
+3. Ingress Controller --> 
+4. Ingress --> 
+5. service --> 
+6. Pods.
+- you can map the ip address  with the host name by vim /etc/hosts
+
+####################### Helm in Kubernetes ######################
+- Helm is a package manager for Kubernetes. it is used to package YAML files and distribute them in public and private repositories
+- how it works --> lets say you want to use elastic stack for loggin within your cluster, you will need:
+1. statefulset for database 
+2. configmap for external configuration
+3. secret for passwords and keys 
+4. services 
+5. k8s users with permission 
+- the bundles of all the YAML file abpove is called helm charts. and you can push them to helm repository to make it available for others or you can consume other existing helm chart.
+- commonly used app like: 
+1. database apps --> mongodb; elasticsearch; mysql 
+2. monitoring apps --> prometheus 
+- that has complex setup all has helm chart available in repositories.
+- you can use cli or helm hub for charts 
+- functions of helm:
+1. sharing helm charts --> public or private repository 
+2. templating engine --> defining a common bluepront for all files and replacing dynamic values with placeholders i.e. a template file. 
+- so instead of having multiple yaml files for all microservices, you can have one yaml file template. it is practical for CICD.
+3. when you deploy same set of cluster accross different environments.
+4. release management --> there is a tiller server that keep track of all chart executions. 
+- tiller is only available in version 2 no longer available in version 3 for security purpose.
+- Helm chart structure: Directory structure.
+1. mychart/ --> top level folder 
+2. chart.yaml --> metadata about the chart e.g. name, version, list of dependencies, etc.
+3. values.yaml --> values are configured for the template files. it is the default values that you can overide 
+4. chart/ --> folder with chart dependencies inside it i.e. if this chart depends on other chart, it will be indicated here
+5. template/ --> folder where the template files are stored  
+- when you execute helm install <chart-name> 
+- optionally, you can have readme file and license file in the folder too. 
+
+
+####################### youtube project ######################
+- create a deployment file for mongodb and add a service file 
+- create a secret file and configure it with - echo -n 'password/username' | base64 
+- create a mongo-express deployment file with environmental variables for:
+1. database credentials i.e. username and password linked to secret file 
+2. database server i.e. you can either pass the url or link to configmap | configmap i.e. database url is the name of the service in service file
+3. database port i.e. linked to service file | also a nodeport that will be used to access the browser | range from 30000 - 32767
+- flow: request from web --> app external service --> app pod --> DB internal service --> DB pod 
+# project 2
+- create k8s cluster with aws eks - 2 nodes - connect through cli
+- use helm chart 
+1. install helm 
+2. run helm repo add bitnami https://charts.bitnami.com/bitnami 
+3. run helm search repo bitnami/mongo
+- defines parameter for 
+1. architecture = replicaset 
+2. storageClass i.e. volume
+3. root password 
+- create a value.yaml file to overide the parameters
+- run helm install <appname> --values <value.yaml> <chartname>
+
+####################### patch coredns in a serverless cluster (you must patch it before you use it ) ######################
+**kubectl patch deployment coredns \
+-n kube-system \
+--type json \
+-p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'**

@@ -1,0 +1,6 @@
+architecture: replicaset
+replicaCount: 3
+persistence:
+  storageClass: "amazon-EBS-volume"
+auth:
+  rootPassword: secret-root-pwd

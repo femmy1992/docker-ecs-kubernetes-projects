@@ -1,0 +1,56 @@
+# intro to container services: 
+1. ECS = Orchestration tool like k8s but developed by amazon. is is used for managing, scaling and deploying containers.
+2. EKS = helps to manage the master node for k8s
+3. ECR = AWS native container registry just like docker hub
+
+# ECS with Fargate and Ec2
+1. Fargate = serverless 
+2. EC2 = managed infrastructure 
+
+# Communication with Master Nodes
+1. ECS = in EC2 you have Docker agent and ECS agent
+2. EKS = in EC2 you have Docker agent and K8s worker processes 
+
+# Communication with Slave Nodes 
+1. EKS with EC2 = self-managed. manage infrastructure for worker Nodes 
+2. EKS with Nodegroup = semi-managed. creates, deletes, EC2 instances for you, but you need to configure it 
+3. EKS with Fargate = fully-managed
+
+# how ECR works 
+1. write code = write and package code as a docker image
+2. ECR = compress, encrypt and control access to image; version, tag and manage lifecycle 
+3. Run containers = pull images and run container anywhere - ECS, EKS or On-premise
+
+
+# Kubectl commands cheatsheet 
+- kubectl version --short --client = to check version
+- kubectl apply -f <file_name> = to deploy an app
+- kubectl get nodes = to see info of nodes 
+- kubectl get pods = to see info of pods 
+- kubectl get svc = to see info for services 
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+
+# step by step project for group node 
+	• Kubernetes Lab: Group Node
+	• Create ec2 instance and configure AWS access with secret key and secret access | you can use your local laptop, just install all the necessary tools. Using ec2 server is better because most of the tools were already installed. 
+	• Create an EKS role with  AmazonEKSClusterPolicy for the control Plane 
+	• Create an EC2 role with AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy and AmazonEC2ContainerRegistryReadOnly for workers node 
+	• Create VPC complete network with 2 public and 2 private subnet, route tables and Natgateway as well as security group with port 80 allowed. This is done with terraform module. 
+	• Create EKS cluster in AWS console, select private and public endpoints and enable all logs in real world environment. | this is the control plane, use the EKS role created for control plane.
+	• In your EC2 server, install aws IAM authenticator (step 1,3,4,5,6) | install kubectl latest version (step a,c,d,e,f)
+	• In your EKS cluster, under compute, add node groups to create worker node
+	• Run = aws eks --region <region_name> update-kubeconfig --name <my cluster_name> = to connect to the EKS cluster from your EC2 server or local computer | you cat path = to see the pem file used for the connection
+	• Run = kubectl get svc = to ge the services | kubectl get nodes = to see all nodes | kubectl get ns = to see all name spaces
+	• You can install git (sudo yum install git -y) on the EC2 server  and clone the repository with the app file and database file. See vscode | cd in to the directory with the database file and app file
+	• Deploy database first = kubectl apply -f <file_name> 
+	• Deploy app = kubectl apply - f <file_name> 
+	• Run = kubectl get pods = to see all the pods 
+
+# eksctl commands
+- eksctl version = to check version
+- eksctl create cluster --name <my_fargate> --fargate = to create a cluster 
+- eksctl delete cluster --name <my_fargate> = to delete cluster 
+
+
+
